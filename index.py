@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, CallbackQueryH
 from movies_scraper import search_movies, get_movie
 
 
-TOKEN = os.getenv("TOKEN")
+TOKEN = "7408716433:AAGFkyLuniEG2Z7Ip5vvpCLhfTUU-w5Tlxw"
 URL = "https://obilo-repo.vercel.app"
 bot = Bot(TOKEN)
 
