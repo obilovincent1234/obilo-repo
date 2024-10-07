@@ -53,3 +53,49 @@ def search_movies(query):
         print(f"Error fetching data from 1337x.to: {response.status_code}")
     
     return movies_list
+
+def get_movie(query):
+    movie_details = {}
+    
+    if query in url_list:
+        movie_page_url = url_list[query]
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        }
+        response = requests.get(movie_page_url, headers=headers)
+        
+        if response.ok:
+            movie_page = BeautifulSoup(response.text, "html.parser")
+            
+            # Extract title
+            title_tag = movie_page.find("h1", class_="movie-info-title")
+            if title_tag:
+                movie_details["title"] = title_tag.text.strip()
+            else:
+                movie_details["title"] = "Unknown Title"
+            
+            # Extract image
+            img_tag = movie_page.find("div", class_="movie-image").find("img")
+            if img_tag and img_tag.get("src"):
+                movie_details["img"] = img_tag["src"]
+            else:
+                movie_details["img"] = None
+            
+            # Extract download links
+            download_section = movie_page.find("div", class_="download-links")
+            if download_section:
+                download_links = download_section.find_all("a", class_="button")
+                final_links = {}
+                for i, link in enumerate(download_links):
+                    download_url = link['href']
+                    final_links[f"Download Link {i+1}"] = download_url
+                movie_details["links"] = final_links
+            else:
+                movie_details["links"] = {}
+        else:
+            print(f"Error fetching movie details from 1337x.to: {response.status_code}")
+    else:
+        print(f"Query '{query}' not found in url_list.")
+    
+    return movie_details
+            
