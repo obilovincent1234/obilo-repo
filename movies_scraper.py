@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 
 url_list = {}
+api_key = "df34fe1eaba7e3ba21f546924ba0fa0937e0f089"  # Not used in this example
 
 def search_movies(query):
     movies_list = []
@@ -10,6 +11,9 @@ def search_movies(query):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0',
         'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
     }
     
     try:
@@ -28,7 +32,7 @@ def search_movies(query):
         for index, movie in enumerate(movies):
             title_column = movie.find("td", class_="coll-1")
             if title_column:
-                title_tag = title_column.find("a")
+                title_tag = title_column.find("a", class_="title")
                 if title_tag:
                     title = title_tag.text.strip()
                     link = title_tag['href']
@@ -86,7 +90,7 @@ def get_movie(query):
 
 # Example Usage
 if __name__ == "__main__":
-    search_query = "Stargirl"
+    search_query = "Inception"
     results = search_movies(search_query)
     for result in results:
         print(result)
