@@ -7,7 +7,7 @@ api_key = "df34fe1eaba7e3ba21f546924ba0fa0937e0f089"  # Not used in this example
 
 def search_movies(query):
     movies_list = []
-    search_url = f"https://1337x.to/search/{query.replace(' ', '%20')}/1/"
+    search_url = f"https://1337x.to/search/{query}/1/"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0',
         'Accept-Language': 'en-US,en;q=0.5',
