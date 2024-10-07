@@ -2,20 +2,25 @@ import requests
 from bs4 import BeautifulSoup
 
 url_list = {}
-api_key = "df34fe1eaba7e3ba21f546924ba0fa0937e0f089"
 
 def search_movies(query):
     movies_list = []
-    website = BeautifulSoup(requests.get(f"https://185.53.88.104/?s={query.replace(' ', '+')}").text, "html.parser")
-    movies = website.find_all("a", {'class': 'ml-mask jt'})
+    search_url = f"https://1337x.to/search/{query.replace(' ', '%20')}/1/"
+    response = requests.get(search_url)
     
-    for index, movie in enumerate(movies):  # Use enumerate for unique IDs
-        if movie:
+    if response.ok:
+        website = BeautifulSoup(response.text, "html.parser")
+        movies = website.find_all("tr")  # Example structure, can vary depending on site
+        
+        for index, movie in enumerate(movies):
+            movie_name = movie.find("a", class_="title").text
+            download_page = movie.find("a", href=True)["href"]
+            
             movies_details = {
                 "id": f"link{index}",
-                "title": movie.find("span", {'class': 'mli-info'}).text if movie.find("span", {'class': 'mli-info'}) else "Unknown Title"
+                "title": movie_name
             }
-            url_list[movies_details["id"]] = movie['href']
+            url_list[movies_details["id"]] = f"https://1337x.to{download_page}"
             movies_list.append(movies_details)
     
     return movies_list
@@ -24,30 +29,25 @@ def search_movies(query):
 def get_movie(query):
     movie_details = {}
     
-    if query in url_list:  # Check if query exists in url_list
-        movie_page_link = BeautifulSoup(requests.get(url_list[query]).text, "html.parser")
+    if query in url_list:
+        movie_page_link = requests.get(url_list[query]).text
+        movie_page = BeautifulSoup(movie_page_link, "html.parser")
         
-        if movie_page_link:
-            title = movie_page_link.find("div", {'class': 'mvic-desc'}).h3.text if movie_page_link.find("div", {'class': 'mvic-desc'}) else "Unknown Title"
-            movie_details["title"] = title
-            
-            img = movie_page_link.find("div", {'class': 'mvic-thumb'})['data-bg'] if movie_page_link.find("div", {'class': 'mvic-thumb'}) else None
-            movie_details["img"] = img
-            
-            links = movie_page_link.find_all("a", {'rel': 'noopener', 'data-wpel-link': 'internal'})
-            final_links = {}
-            for i in links:
-                url = f"https://urlshortx.com/api?api={api_key}&url={i['href']}"
-                response = requests.get(url)
-                
-                if response.ok:  # Check if response is OK
-                    link = response.json()
-                    final_links[i.text] = link.get('shortenedUrl', "Shortened URL not available")
-            
-            movie_details["links"] = final_links
-            
+        title = movie_page.find("h1").text
+        movie_details["title"] = title
+        
+        img = movie_page.find("img", class_="poster")["src"] if movie_page.find("img", class_="poster") else None
+        movie_details["img"] = img
+        
+        download_links = movie_page.find_all("a", class_="download-link")
+        final_links = {}
+        
+        for i, link in enumerate(download_links):
+            final_links[f"Link {i+1}"] = link["href"]
+        
+        movie_details["links"] = final_links
     else:
         print(f"Query '{query}' not found in url_list.")
-
+    
     return movie_details
     
